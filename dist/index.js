@@ -2654,12 +2654,12 @@
   };
 
   // src/framework/views/view.ts
-  var view = class {
-    constructor(parent, model) {
+  var View = class {
+    constructor(parent, collection2) {
       this.parent = parent;
-      this.model = model;
+      this.collection = collection2;
       this.regions = {};
-      this.bindModel();
+      this.bindCollection();
     }
     eventsMap() {
       return {};
@@ -2677,8 +2677,13 @@
         }
       }
     }
-    bindModel() {
-      this.model.on("change", () => {
+    // bindModel() {
+    //     this.model.on('change', () => {
+    //         this.render()
+    //     })
+    // }
+    bindCollection() {
+      this.collection.on("change", () => {
         this.render();
       });
     }
@@ -2705,19 +2710,43 @@
   };
 
   // src/user/UserList.ts
-  var UserList = class extends view {
+  var UserList = class extends View {
+    constructor() {
+      super(...arguments);
+      this.onUserSelect = () => {
+        const selectElement = this.parent.querySelector("select");
+        if (!selectElement) return;
+        const selectedUserId = selectElement.value;
+        const user = User.build({ id: selectedUserId });
+        user.fetch();
+        console.log(user);
+      };
+    }
     template() {
+      const usersOptions = this.collection.models.map((user) => `
+                <option value="${user.get("id")}">
+                    ${user.get("name")}
+                </option>
+            `).join("");
       return `
             <div>
                 <h1>User List</h1>
-                
+                <select class="user-list">
+                    <option value="">Select a user</option>
+                    ${usersOptions}
+                </select>
             </div>
         `;
+    }
+    eventsMap() {
+      return {
+        "change:.user-list": this.onUserSelect
+      };
     }
   };
 
   // src/user/UserEdit.ts
-  var UserEdit = class extends view {
+  var UserEdit = class extends View {
     regionsMap() {
       return {
         userList: ".user-list",
@@ -2735,21 +2764,19 @@
         `;
     }
     onRender() {
-      new UserList(this.regions.userList, this.model).render();
+      new UserList(this.regions.userList, this.collection).render();
     }
   };
 
   // src/index.ts
   var collection = User.buildCollection();
   collection.fetch();
-  console.log(collection);
   var jhon = User.build({ id: "fd5e" });
   jhon.fetch();
   var rootElement = document.getElementById("root");
   var alex = User.build({ name: "alex", age: 30 });
   if (rootElement) {
-    const userEdit = new UserEdit(rootElement, alex);
+    const userEdit = new UserEdit(rootElement, collection);
     userEdit.render();
-    console.log(userEdit);
   }
 })();

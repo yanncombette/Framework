@@ -6,7 +6,7 @@ import { UserShow } from "./user/UserShow";
 
 const collection = User.buildCollection()
 collection.fetch()
-console.log(collection)
+// console.log(collection)
 
 const jhon = User.build({id: "fd5e"})
 jhon.fetch()
@@ -24,8 +24,8 @@ if (rootElement){
     // userForm.render()
 
     // rootElement.addEventListener('click', (event) => {})
-    const userEdit = new UserEdit(rootElement, alex)
+    const userEdit = new UserEdit(rootElement, collection)
     userEdit.render()
-    console.log(userEdit)
+    // console.log(userEdit)
 
 }
