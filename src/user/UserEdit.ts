@@ -5,8 +5,10 @@ import { UserList } from "./UserList";
 import { UserShow } from "./UserShow";
 
 export class UserEdit extends view<User, UserProps> {
+
     regionsMap(): { [key: string]: string; } {
         return {
+            userList: '.user-list',
             userShow: '.user-show',
             userForm: '.user-form'
         }
@@ -23,7 +25,7 @@ export class UserEdit extends view<User, UserProps> {
 
     onRender(): void {
         new UserList(this.regions.userList, this.model).render()
-        new UserShow(this.regions.userShow, this.model).render()
-        new UserForm(this.regions.userForm, this.model).render()
+        // new UserShow(this.regions.userShow, this.model).render()
+        // new UserForm(this.regions.userForm, this.model).render()
     }
 }

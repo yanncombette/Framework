@@ -2650,7 +2650,6 @@
     setRandomAge() {
       const age = Math.round(Math.random() * 99 + 1);
       this.set({ age });
-      console.log("Random Age Set!");
     }
   };
 
@@ -2705,62 +2704,13 @@
     }
   };
 
-  // src/user/UserForm.ts
-  var UserForm = class extends view {
-    constructor() {
-      super(...arguments);
-      this.onSetAgeClick = () => {
-        this.model.setRandomAge();
-      };
-      this.onUpdateNameClick = () => {
-        const input = this.parent.querySelector("input");
-        this.model.set({ name: input.value });
-      };
-      this.onSaveClick = () => {
-        this.model.save();
-      };
-    }
-    template() {
-      return `
-            <div>
-                <h1>User Form</h1>
-                <input />
-                <button class="set-name">Update Name</button>
-                <button class="set-age">Randome Age</button>
-                <button class="save-model">Save User</button>
-            </div>
-        `;
-    }
-    eventsMap() {
-      return {
-        "click:.set-age": this.onSetAgeClick,
-        "click:.set-name": this.onUpdateNameClick,
-        "click:.save-model": this.onSaveClick
-      };
-    }
-  };
-
   // src/user/UserList.ts
   var UserList = class extends view {
     template() {
       return `
             <div>
-                <h1>User Detail</h1>
-                <div>User Name: ${this.model.get("name")}</div>
-                <div>User Age: ${this.model.get("age")}</div>
-            </div>
-        `;
-    }
-  };
-
-  // src/user/UserShow.ts
-  var UserShow = class extends view {
-    template() {
-      return `
-            <div>
-                <h1>User Detail</h1>
-                <div>User Name: ${this.model.get("name")}</div>
-                <div>User Age: ${this.model.get("age")}</div>
+                <h1>User List</h1>
+                
             </div>
         `;
     }
@@ -2770,6 +2720,7 @@
   var UserEdit = class extends view {
     regionsMap() {
       return {
+        userList: ".user-list",
         userShow: ".user-show",
         userForm: ".user-form"
       };
@@ -2785,12 +2736,13 @@
     }
     onRender() {
       new UserList(this.regions.userList, this.model).render();
-      new UserShow(this.regions.userShow, this.model).render();
-      new UserForm(this.regions.userForm, this.model).render();
     }
   };
 
   // src/index.ts
+  var collection = User.buildCollection();
+  collection.fetch();
+  console.log(collection);
   var jhon = User.build({ id: "fd5e" });
   jhon.fetch();
   var rootElement = document.getElementById("root");

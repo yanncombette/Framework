@@ -4,9 +4,9 @@ import { UserEdit } from "./user/UserEdit";
 import { UserForm } from "./user/UserForm";
 import { UserShow } from "./user/UserShow";
 
-// const collection = User.buildCollection()
-// collection.on("change", () => console.log(collection.models))
-// collection.fetch()
+const collection = User.buildCollection()
+collection.fetch()
+console.log(collection)
 
 const jhon = User.build({id: "fd5e"})
 jhon.fetch()

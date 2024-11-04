@@ -14,6 +14,7 @@ export interface UserProps extends HasId {
 }
 
 export class User extends Model<UserProps> {
+    
     static build(attrs: UserProps): User {
         return new User(
             new Attributes<UserProps>(attrs),
@@ -29,6 +30,6 @@ export class User extends Model<UserProps> {
     setRandomAge(){
         const age = Math.round(Math.random() * 99 +1)
         this.set({age})
-        console.log('Random Age Set!')
+        // console.log('Random Age Set!')
     }
 }
