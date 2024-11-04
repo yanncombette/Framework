@@ -1,7 +1,7 @@
-import { view } from "../framework/views/view";
+import { View } from "../framework/views/view";
 import { User, UserProps } from "./User";
 
-export class UserShow extends view<User, UserProps> {
+export class UserShow extends View<User, UserProps> {
     template() {
         return `
             <div>
