@@ -1,14 +1,15 @@
 import { HasId } from "../interfaces/HasId.interface"
 import { Model } from "../model/Model"
+import { Collection } from "../Collection";
 
-export abstract class View<T extends Model<P>, P extends HasId> {
+export abstract class ViewCollection<T extends Collection<Model<P>, P>, P extends HasId> {
     public regions: { [key: string]: Element } = {}
 
     constructor(
         public parent: Element,
-        public model: T
+        public collection: T
     ) {
-        this.bindModel()
+        this.bindCollection()
     }
 
     abstract template(): string
@@ -34,8 +35,8 @@ export abstract class View<T extends Model<P>, P extends HasId> {
         }
     }
 
-    bindModel() {
-        this.model.on('change', () => {
+    bindCollection() {
+        this.collection.on('change', () => {
             this.render()
         })
     }

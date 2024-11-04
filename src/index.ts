@@ -13,8 +13,8 @@ jhon.fetch()
 
 
 const rootElement = document.getElementById('root')
-const alex = User.build({name: 'alex', age: 30})
 
+const alex = User.build({name: 'alex', age: 30})
 
 if (rootElement){
     // const userShow = new UserShow(rootElement, alex)
