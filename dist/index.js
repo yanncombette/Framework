@@ -2653,6 +2653,92 @@
     }
   };
 
+  // src/framework/views/view.ts
+  var View = class {
+    constructor(parent, model) {
+      this.parent = parent;
+      this.model = model;
+      this.regions = {};
+      this.bindModel();
+    }
+    eventsMap() {
+      return {};
+    }
+    regionsMap() {
+      return {};
+    }
+    bindRegions(fragment) {
+      const regionsMap = this.regionsMap();
+      for (let key in regionsMap) {
+        const selector = regionsMap[key];
+        const element = fragment.querySelector(selector);
+        if (element) {
+          this.regions[key] = element;
+        }
+      }
+    }
+    bindModel() {
+      this.model.on("change", () => {
+        this.render();
+      });
+    }
+    onRender() {
+    }
+    render() {
+      this.parent.innerHTML = "";
+      const templateElement = document.createElement("template");
+      templateElement.innerHTML = this.template();
+      this.bindEvents(templateElement.content);
+      this.bindRegions(templateElement.content);
+      this.onRender();
+      this.parent.append(templateElement.content);
+    }
+    bindEvents(fragment) {
+      const eventsMap = this.eventsMap();
+      for (let eventKey in eventsMap) {
+        const [eventName, selector] = eventKey.split(":");
+        fragment.querySelectorAll(selector).forEach((element) => {
+          element.addEventListener(eventName, eventsMap[eventKey]);
+        });
+      }
+    }
+  };
+
+  // src/user/UserForm.ts
+  var UserForm = class extends View {
+    constructor() {
+      super(...arguments);
+      this.onSetAgeClick = () => {
+        this.model.setRandomAge();
+      };
+      this.onUpdateNameClick = () => {
+        const input = this.parent.querySelector("input");
+        this.model.set({ name: input.value });
+      };
+      this.onSaveClick = () => {
+        this.model.save();
+      };
+    }
+    template() {
+      return `
+            <div>
+                <h1>User Form</h1>
+                <input />
+                <button class="set-name">Update Name</button>
+                <button class="set-age">Randome Age</button>
+                <button class="save-model">Save User</button>
+            </div>
+        `;
+    }
+    eventsMap() {
+      return {
+        "click:.set-age": this.onSetAgeClick,
+        "click:.set-name": this.onUpdateNameClick,
+        "click:.save-model": this.onSaveClick
+      };
+    }
+  };
+
   // src/framework/views/ViewCollection.ts
   var ViewCollection = class {
     constructor(parent, collection2) {
@@ -2708,13 +2794,13 @@
   var UserList = class extends ViewCollection {
     constructor() {
       super(...arguments);
-      this.onUserSelect = () => {
+      this.handleUserSelect = () => {
         const selectElement = this.parent.querySelector("select");
         if (!selectElement) return;
         const selectedUserId = selectElement.value;
-        const user = User.build({ id: selectedUserId });
-        user.fetch();
-        console.log(user);
+        if (this.onUserSelect && selectedUserId) {
+          this.onUserSelect(selectedUserId);
+        }
       };
     }
     template() {
@@ -2735,13 +2821,36 @@
     }
     eventsMap() {
       return {
-        "change:.user-list": this.onUserSelect
+        "change:.user-list": this.handleUserSelect
       };
     }
   };
 
+  // src/user/UserShow.ts
+  var UserShow = class extends View {
+    template() {
+      return `
+            <div>
+                <h1>User Detail</h1>
+                <div>User Name: ${this.model.get("name")}</div>
+                <div>User Age: ${this.model.get("age")}</div>
+            </div>
+        `;
+    }
+  };
+
   // src/user/UserEdit.ts
-  var UserEdit = class extends ViewCollection {
+  var UserEdit = class extends View {
+    constructor(parent, model, collection2) {
+      super(parent, model);
+      this.onUserSelect = async (userId) => {
+        const user = User.build({ id: userId });
+        user.fetch();
+        this.model = user;
+        new UserShow(this.regions.userShow, this.model).render();
+      };
+      this.collection = collection2;
+    }
     regionsMap() {
       return {
         userList: ".user-list",
@@ -2759,7 +2868,16 @@
         `;
     }
     onRender() {
-      new UserList(this.regions.userList, this.collection).render();
+      const userList = new UserList(this.regions.userList, this.collection);
+      userList.onUserSelect = async (userId) => {
+        const user = User.build({ id: userId });
+        await user.fetch();
+        this.model = user;
+        new UserShow(this.regions.userShow, this.model).render();
+      };
+      userList.render();
+      new UserShow(this.regions.userShow, this.model).render();
+      new UserForm(this.regions.userForm, this.model).render();
     }
   };
 
@@ -2771,7 +2889,7 @@
   var rootElement = document.getElementById("root");
   var alex = User.build({ name: "alex", age: 30 });
   if (rootElement) {
-    const userEdit = new UserEdit(rootElement, collection);
+    const userEdit = new UserEdit(rootElement, alex, collection);
     userEdit.render();
   }
 })();

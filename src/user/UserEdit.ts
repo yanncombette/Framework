@@ -6,7 +6,13 @@ import { UserForm } from "./UserForm";
 import { UserList } from "./UserList";
 import { UserShow } from "./UserShow";
 
-export class UserEdit extends ViewCollection<Collection<User, UserProps>, UserProps> {
+export class UserEdit extends View<User, UserProps> {
+    private collection: Collection<User, UserProps>;
+    constructor(parent: Element, model: User, collection: Collection<User, UserProps>) {
+        super(parent, model)
+        this.collection = collection
+    }
+
 
     regionsMap(): { [key: string]: string; } {
         return {
@@ -26,8 +32,25 @@ export class UserEdit extends ViewCollection<Collection<User, UserProps>, UserPr
     }
 
     onRender(): void {
-        new UserList(this.regions.userList, this.collection).render()
-        // new UserShow(this.regions.userShow, this.model).render()
-        // new UserForm(this.regions.userForm, this.model).render()
+        const userList = new UserList(this.regions.userList, this.collection)
+
+        userList.onUserSelect = async (userId: string) => {
+            const user = User.build({ id: userId })
+            await user.fetch();
+            this.model = user
+            new UserShow(this.regions.userShow, this.model).render();
+        }
+        userList.render()
+
+        new UserShow(this.regions.userShow, this.model).render()
+        new UserForm(this.regions.userForm, this.model).render()
     }
+
+    onUserSelect = async (userId: string) => {
+        const user = User.build({ id: userId })
+        user.fetch()
+        this.model = user
+        new UserShow(this.regions.userShow, this.model).render()
+    };
+
 }
